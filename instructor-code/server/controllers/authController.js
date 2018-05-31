@@ -23,11 +23,14 @@ module.exports = {
     function storeUserInfoInDatabase(response) {
       const userData = response.data;
       const db = req.app.get('db');
-      db.find_user_by_auth0_id(userData.sub).then(users => {
+      db.find_user_by_auth0_id({
+        auth0_id: userData.sub
+      }).then(users => {
         if (users.length) {
           const userFromDb = users[0];
+          // console.log('userFromDb', userFromDb);
           req.session.user = userFromDb;
-          res.redirect('/');
+          res.redirect('/#/profile');
         } else {
           return db.create_user({
             auth0_id: userData.sub,
@@ -35,8 +38,9 @@ module.exports = {
             photo: userData.picture,
             name: userData.name,
           }).then(newUser => {
+            // console.log('newUser', newUser);
             req.session.user = newUser;
-            res.redirect('/');
+            res.redirect('/#/profile');
           });
         }
       });
@@ -44,9 +48,17 @@ module.exports = {
 
     tradeCodeForAccessToken()
       .then(tradeAccessTokenForUserInfo)
-
+      .then(storeUserInfoInDatabase)
+      .catch(error => {
+        console.log('Server error', error);
+        res.status(500).send('Error happened: ' + error);
+      });
   },
   logout: (req, res) => {
-
+    req.session.destroy();
+    res.end();
+  },
+  getUser: (req, res) => {
+    res.json(req.session.user);
   },
 };

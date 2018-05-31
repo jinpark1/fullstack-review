@@ -4,6 +4,7 @@ const axios = require('axios');
 const session = require('express-session');
 require('dotenv').config();
 const bodyParser = require('body-parser');
+const authController = require('./controllers/authController');
 
 const app = express();
 app.use( bodyParser.json() );
@@ -20,7 +21,9 @@ massive(process.env.CONNECTION_STRING).then(db => {
     app.set('db', db);
 });
 
-
+app.get('/callback', authController.login);
+app.get('/api/user', authController.getUser);
+app.post('/api/logout', authController.logout);
 
 const port = 3500;
 app.listen( port, () => {

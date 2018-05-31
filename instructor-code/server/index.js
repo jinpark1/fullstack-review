@@ -6,23 +6,22 @@ require('dotenv').config();
 const bodyParser = require('body-parser');
 
 const app = express();
-app.use( bodyparser.json() );
+app.use(bodyParser.json());
 app.use(session({
-    resave: false,
-    saveUninitialized: false,
-    cookie: {
-        maxAge: 1000 * 60 * 60 * 24 * 14,
-    },
-    secret: process.env.SESSION_SECRET,
+  resave: false,
+  saveUninitialized: false,
+  cookie: {
+    maxAge: 1000 * 60 * 60 * 24 * 14,
+  },
+  secret: process.env.SESSION_SECRET,
 }));
 
 massive(process.env.CONNECTION_STRING).then(db => {
-    app.set('db', db);
+  app.set('db', db);
 });
 
 
-
-const port = 3500;
-app.listen( port, () => {
-    console.log(`Sever listening on port ${port}.`);
+const PORT = 3500;
+app.listen(PORT, () => {
+  console.log(`Server listening on port ${PORT} 🚀`);
 });

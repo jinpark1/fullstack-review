@@ -6,7 +6,7 @@ require('dotenv').config();
 const bodyParser = require('body-parser');
 
 const app = express();
-app.use( bodyparser.json() );
+app.use( bodyParser.json() );
 app.use(session({
     resave: false,
     saveUninitialized: false,

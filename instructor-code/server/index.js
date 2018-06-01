@@ -24,6 +24,7 @@ massive(process.env.CONNECTION_STRING).then(db => {
 app.get('/callback', authController.login);
 app.get('/api/user', authController.getUser);
 app.post('/api/logout', authController.logout);
+app.put('/api/user', authController.editProfile);
 
 const PORT = 3500;
 app.listen(PORT, () => {

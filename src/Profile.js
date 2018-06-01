@@ -22,7 +22,7 @@ class Profile extends Component {
     axios.post('/api/logout').then(response => {
       logoutUser();
       history.push('/');
-    })
+    });
   }
   
   render() {

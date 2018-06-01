@@ -10,12 +10,12 @@ module.exports = {
       redirect_uri: `http://${req.headers.host}/callback`
     };
 
-   
+    // This is step 5 in the diagram.
     function tradeCodeForAccessToken() {
       return axios.post(`https://${process.env.REACT_APP_AUTH0_DOMAIN}/oauth/token`, payload);
     }
 
-    
+    // This is step 7 in the diagram.
     function tradeAccessTokenForUserInfo(accessTokenResponse) {
       return axios.get(`https://${process.env.REACT_APP_AUTH0_DOMAIN}/userinfo?access_token=${accessTokenResponse.data.access_token}`);
     }
@@ -23,23 +23,25 @@ module.exports = {
     function storeUserInfoInDatabase(response) {
       const userData = response.data;
       const db = req.app.get('db');
-      db.find_user_by_auth0_id({auth0_id: userData.sub}).then(users => {
+      db.find_user_by_auth0_id({
+        auth0_id: userData.sub
+      }).then(users => {
         if (users.length) {
           const userFromDb = users[0];
           // console.log('userFromDb', userFromDb);
           req.session.user = userFromDb;
           res.redirect('/#/profile');
         } else {
-            return db.create_user({
-                auth0_id: userData.sub,
-                email: userData.email,
-                photo: userData.picture,
-                name: userData.name,
-            }).then(newUser => {
-                // console.log('newUser', newUser);
-                req.session.user = newUser;
-                res.redirect('/#/profile');
-            });
+          return db.create_user({
+            auth0_id: userData.sub,
+            email: userData.email,
+            photo: userData.picture,
+            name: userData.name,
+          }).then(newUser => {
+            // console.log('newUser', newUser);
+            req.session.user = newUser;
+            res.redirect('/#/profile');
+          });
         }
       });
     }
@@ -48,19 +50,28 @@ module.exports = {
       .then(tradeAccessTokenForUserInfo)
       .then(storeUserInfoInDatabase)
       .catch(error => {
-          console.log('----------server error', error);
-          res.status(500).send('Check the server for error message');
-         // Reminder: code below redirects user. 
-        //   res.status(500).redirect('/error')  
+        console.log('Server error', error);
+        res.status(500).send('Error happened: ' + error);
       });
   },
-
   logout: (req, res) => {
     req.session.destroy();
     res.end();
   },
-
-  getUser: (req,res) => {
+  getUser: (req, res) => {
     res.json(req.session.user);
   },
+  editProfile: (req, res) => {
+    const { email } = req.body;
+    const db = req.app.get('db');
+    db.edit_user({
+      id: req.session.user.id,
+      email,
+    }).then(updatedUsers => {
+      res.status(200).json({ user: updatedUsers[0] });
+    }).catch(error => {
+      console.log('edit profile error', error);
+      res.status(500).json({ message: 'Error editing profile' });
+    });
+  }
 };

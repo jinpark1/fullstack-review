@@ -1,5 +1,6 @@
 const LOGIN = 'LOGIN';
 const LOGOUT = 'LOGOUT';
+const UPDATE_EMAIL = 'UPDATE_EMAIL';
 
 const initialState = {
   user: null,
@@ -11,6 +12,8 @@ export default function(state = initialState, action) {
       return { ...state, user: action.payload };
     case LOGOUT:
       return { ...state, user: null };
+    case UPDATE_EMAIL:
+      return { ...state, user: { ...state.user, email: action.payload } };
     default:
       return state;
   }
@@ -28,3 +31,10 @@ export function logoutUser() {
     type: LOGOUT,
   };
 };
+
+export function updateEmail(email) {
+  return {
+    type: UPDATE_EMAIL,
+    payload: email,
+  };
+}

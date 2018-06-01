@@ -61,4 +61,17 @@ module.exports = {
   getUser: (req, res) => {
     res.json(req.session.user);
   },
+  editProfile: (req, res) => {
+    const { email } = req.body;
+    const db = req.app.get('db');
+    db.edit_user({
+      id: req.session.user.id,
+      email,
+    }).then(updatedUsers => {
+      res.status(200).json({ user: updatedUsers[0] });
+    }).catch(error => {
+      console.log('edit profile error', error);
+      res.status(500).json({ message: 'Error editing profile' });
+    });
+  }
 };
